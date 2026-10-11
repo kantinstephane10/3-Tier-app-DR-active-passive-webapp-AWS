@@ -1,0 +1,3 @@
+# The Jenkins agent is Linux: keep LF endings for scripts, templates and Terraform.
+* text=auto eol=lf
+*.png binary
