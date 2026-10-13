@@ -1,0 +1,22 @@
+{
+  "name": "kantin-orders",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24 <25" },
+  "scripts": {
+    "start": "node src/server.js",
+    "preview": "node scripts/preview.js",
+    "worker": "node src/worker.js",
+    "migrate": "node src/migrate.js",
+    "test": "node --test --test-concurrency=1 test/*.test.js",
+    "test:postgres": "TEST_DATABASE_URL=postgres://orders:orders@127.0.0.1:5432/orders_test node --test --test-concurrency=1 test/*.test.js",
+    "check": "node scripts/check-syntax.js",
+    "bundle": "python3 scripts/bundle.py"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "3.1150.0",
+    "pg": "8.23.1"
+  },
+  "devDependencies": { "@electric-sql/pglite": "0.5.9" }
+}

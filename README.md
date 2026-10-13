@@ -187,3 +187,9 @@ See [VALIDATION.json](VALIDATION.json). Checked on a workstation: `terraform fmt
 - RDS cross-region read replicas: https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/USER_ReadRepl.XRgn.html
 - AWS Backup cross-region copy: https://docs.aws.amazon.com/aws-backup/latest/devguide/cross-region-backup.html
 - Jenkins HTML Publisher: https://plugins.jenkins.io/htmlpublisher/
+
+## Node.js storefront and application pipeline
+
+The database-backed Kantin Supply storefront is in [application/](application/README.md). Its separate Jenkins application job uses script path `application/Jenkinsfile`; this repository's root Jenkinsfile continues to manage infrastructure and local Terraform state.
+
+Read [application integration](application/docs/REPOSITORY-INTEGRATION.md) before deploying it over the Python demo, then follow [application deployment](application/docs/DEPLOYMENT.md). Local preview requires Node.js 24: `cd application`, `npm ci --ignore-scripts`, `npm run preview`.

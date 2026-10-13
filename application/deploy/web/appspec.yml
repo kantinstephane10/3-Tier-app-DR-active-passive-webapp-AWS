@@ -1,0 +1,19 @@
+version: 0.0
+os: linux
+files:
+  - source: public
+    destination: /opt/kantin-orders/web
+file_exists_behavior: OVERWRITE
+hooks:
+  AfterInstall:
+    - location: hooks/configure.sh
+      timeout: 90
+      runas: root
+  ApplicationStart:
+    - location: hooks/start.sh
+      timeout: 60
+      runas: root
+  ValidateService:
+    - location: hooks/validate.sh
+      timeout: 180
+      runas: root
