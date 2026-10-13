@@ -85,6 +85,7 @@ test('standby rejects checkout and readiness, but deployment health works',async
     const client=await session();assert.equal((await post(client,[{productId:'tote',quantity:1}])).status,503);
     assert.equal((await fetch(`${base}/health/ready`)).status,503);
     assert.equal((await fetch(`${base}/health/deploy`)).status,200);
+    assert.equal((await fetch(`${base}/health`)).status,200);
   }finally{config.writeEnabled=true;}
 });
 test('database read-only mode blocks writes even when write flag is active',async()=>{

@@ -4,8 +4,8 @@ set +x
 source /etc/kantin-orders/web.env
 : "${INTERNAL_ALB_DNS:?Set the internal load balancer DNS name}"
 [[ "$INTERNAL_ALB_DNS" =~ ^[a-zA-Z0-9.-]+$ ]] || exit 1
-[[ "${INTERNAL_ALB_PORT:-80}" == 80 || "${INTERNAL_ALB_PORT:-80}" == 443 ]] || exit 1
-if [[ "${INTERNAL_ALB_PORT:-80}" == 443 ]]; then
+[[ "${INTERNAL_ALB_PORT:-8080}" == 8080 || "${INTERNAL_ALB_PORT:-8080}" == 80 || "${INTERNAL_ALB_PORT:-8080}" == 443 ]] || exit 1
+if [[ "${INTERNAL_ALB_PORT:-8080}" == 443 ]]; then
   : "${INTERNAL_API_TLS_NAME:?Set the certificate hostname}"
   [[ "$INTERNAL_API_TLS_NAME" =~ ^[a-zA-Z0-9.-]+$ ]] || exit 1
   UPSTREAM_SCHEME=https
@@ -24,7 +24,8 @@ server {
   add_header Cache-Control no-store always;
   add_header Content-Security-Policy "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'" always;
   resolver 169.254.169.253 valid=30s ipv6=off;
-  set \$api_origin "$UPSTREAM_SCHEME://$INTERNAL_ALB_DNS:${INTERNAL_ALB_PORT:-80}";
+  set \$api_origin "$UPSTREAM_SCHEME://$INTERNAL_ALB_DNS:${INTERNAL_ALB_PORT:-8080}";
+  location = /health { proxy_pass \$api_origin; proxy_connect_timeout 3s; proxy_read_timeout 8s; }
   location = /health/live { access_log off; return 200 'alive'; }
   location = /health/ready { proxy_pass \$api_origin; proxy_connect_timeout 3s; proxy_read_timeout 8s; }
   location = /health/deploy { proxy_pass \$api_origin; proxy_connect_timeout 3s; proxy_read_timeout 8s; }

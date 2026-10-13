@@ -15,6 +15,7 @@ pipeline {
     AWS_PAGER = ''
     AWS_DEFAULT_REGION = "${params.TARGET_REGION}"
     NPM_CONFIG_FUND = 'false'
+    DEPLOY_STARTED = 'false'
   }
   stages {
     stage('Checkout') {
@@ -90,9 +91,10 @@ npm run bundle
         }
       }
     }
-    stage('Migrate, deploy app, deploy web and smoke test') {
+    stage('Jenkins rolling EC2 deployment and smoke test') {
       when { expression { params.ACTION == 'DEPLOY' } }
       steps {
+        script { env.DEPLOY_STARTED = 'true' }
         // AWS CLI uses the trusted agent's instance profile/assumed role. No keys in Git.
         sh 'cd application && python3 scripts/deploy.py "$TARGET_REGION"'
       }
@@ -100,6 +102,11 @@ npm run bundle
   }
   post {
     always {
+      script {
+        if (env.DEPLOY_STARTED == 'true' && fileExists('application/scripts/resume-autoscaling.py')) {
+          sh 'cd application && python3 scripts/resume-autoscaling.py "$TARGET_REGION" "$RELEASE_ID"'
+        }
+      }
       archiveArtifacts artifacts: 'application/reports/security/*.json,application/reports/deployment.json,application/dist/manifest.json', allowEmptyArchive: true, fingerprint: true
     }
     success { archiveArtifacts artifacts: 'application/dist/app.zip,application/dist/web.zip', fingerprint: true }

@@ -60,7 +60,7 @@ export function createServer(pool, config, { log = console.log } = {}) {
     try {
       const path=new URL(req.url,'http://localhost').pathname;
       if (req.method === 'GET' && path === '/health/live') return json(200,{ status:'alive' });
-      if (req.method === 'GET' && ['/health/ready','/health/deploy'].includes(path)) {
+      if (req.method === 'GET' && ['/health/ready','/health/deploy','/health'].includes(path)) {
         const schema=await pool.query('SELECT version FROM schema_versions WHERE version=1');
         if (!schema.rows[0]) throw new Error('Schema version missing');
         if (path === '/health/ready' && !await writable(pool,config)) return json(503,{ status:'standby' });

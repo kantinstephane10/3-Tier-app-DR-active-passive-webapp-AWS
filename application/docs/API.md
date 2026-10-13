@@ -10,6 +10,7 @@ All browser API calls use the same origin through Nginx. Responses are JSON and 
 | GET /api/orders | Latest 50 orders belonging to this guest session |
 | GET /api/orders/:id | This guest's order and item details; another session gets 404 |
 | POST /api/orders | Creates an order and pending job in one transaction |
+| GET /health | Compatibility alias for deploy health, matching the infrastructure target groups |
 | GET /health/live | Process is alive; does not contact DB |
 | GET /health/deploy | DB connection and schema v1 are reachable, including standby |
 | GET /health/ready | Schema reachable and this deployment/database allow writes |

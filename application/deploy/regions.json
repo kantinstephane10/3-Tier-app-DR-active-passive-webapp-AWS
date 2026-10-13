@@ -3,20 +3,28 @@
     "mode": "active",
     "artifactBucket": "REPLACE-WITH-PRIMARY-VERSIONED-BUCKET",
     "kmsKeyArn": "REPLACE-WITH-REGIONAL-KMS-KEY-ARN",
-    "application": "kt-orders",
-    "appDeploymentGroup": "kt-orders-primary-app",
-    "webDeploymentGroup": "kt-orders-primary-web",
     "migrationRunnerId": "REPLACE-WITH-PRIMARY-SSM-INSTANCE-ID",
-    "smokeUrl": "https://REPLACE-WITH-PRIMARY-REGIONAL-TEST-HOSTNAME"
+    "appAsgName": "asg-kt-lab-primary-app",
+    "appTargetGroupArn": "REPLACE-WITH-APP-TARGET-GROUP-ARN",
+    "appReleaseParameter": "/kt-orders/us-east-1/app/release",
+    "webAsgName": "asg-kt-lab-primary-web",
+    "webTargetGroupArn": "REPLACE-WITH-WEB-TARGET-GROUP-ARN",
+    "webReleaseParameter": "/kt-orders/us-east-1/web/release",
+    "publicUrl": null,
+    "deploymentLeaseParameter": "/kt-orders/us-east-1/deployment-lease"
   },
   "us-west-2": {
     "mode": "standby",
     "artifactBucket": "REPLACE-WITH-SECONDARY-VERSIONED-BUCKET",
     "kmsKeyArn": "REPLACE-WITH-REGIONAL-KMS-KEY-ARN",
-    "application": "kt-orders",
-    "appDeploymentGroup": "kt-orders-secondary-app",
-    "webDeploymentGroup": "kt-orders-secondary-web",
     "migrationRunnerId": null,
-    "smokeUrl": "https://REPLACE-WITH-SECONDARY-REGIONAL-TEST-HOSTNAME"
+    "appAsgName": "asg-kt-lab-secondary-app",
+    "appTargetGroupArn": "REPLACE-WITH-APP-TARGET-GROUP-ARN",
+    "appReleaseParameter": "/kt-orders/us-west-2/app/release",
+    "webAsgName": "asg-kt-lab-secondary-web",
+    "webTargetGroupArn": "REPLACE-WITH-WEB-TARGET-GROUP-ARN",
+    "webReleaseParameter": "/kt-orders/us-west-2/web/release",
+    "publicUrl": null,
+    "deploymentLeaseParameter": "/kt-orders/us-west-2/deployment-lease"
   }
 }

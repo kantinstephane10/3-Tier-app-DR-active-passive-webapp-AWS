@@ -7,14 +7,14 @@ A working portfolio storefront and order-processing application for the attached
 | Diagram component | Application implementation |
 |---|---|
 | CloudFront + WAF + Route 53 | HTTPS entry point; forwards API/session traffic without caching |
-| Public regional load balancer | HTTPS listener; routes to the private web ASG |
+| Public regional load balancer | Existing protected HTTP origin listener; CloudFront provides viewer HTTPS |
 | Web EC2 ASG | Nginx serves `public/` and proxies `/api/` and health paths |
-| Internal load balancer | Routes from web EC2 to private app EC2 on port 3000 |
+| Internal load balancer | Routes from web EC2 to private app EC2 on port 8080 |
 | App EC2 ASG | Node.js 24 API and a separate systemd worker per instance |
 | RDS primary/Multi-AZ standby | PostgreSQL 17 database; use the normal RDS writer endpoint |
 | Cross-region RDS read replica | Read-only database until explicitly promoted |
 | AWS Backup | Infrastructure backup and restore; not implemented by application code |
-| Jenkins + CodeDeploy | Tests, security scans, migrations, rolling app/web releases |
+| Jenkins | Tests, security scans, migrations, rolling app/web releases |
 
 The worker uses a transactional PostgreSQL job table, avoiding additional infrastructure beyond your diagram. Multiple workers coordinate with `FOR UPDATE SKIP LOCKED`. The database transaction contains both the order and its job; fulfillment also commits atomically. No payment provider, shipping, email service or SQS queue is required.
 
@@ -66,7 +66,7 @@ Open http://127.0.0.1:3000. Never use the local example password or disable data
 
 ## Prepare AWS and deploy
 
-Follow [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) in order. It covers RDS roles, regional secrets, EC2 preparation, security groups, both CodeDeploy groups, artifact buckets, the migration runner and Jenkins configuration. Configure `deploy/regions.json` with your actual AWS resource names; its placeholders intentionally prevent deployment.
+The root Jenkinsfile on `main` owns infrastructure deployment and setup. This branch's `application/Jenkinsfile` releases application code into that existing environment. Follow [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md) for the setup contract, handoff and application job. Configure `deploy/regions.json` with your actual AWS resource names; its placeholders intentionally prevent deployment.
 
 Jenkins first runs BUILD_ONLY. A DEPLOY build performs:
 
@@ -74,10 +74,12 @@ Jenkins first runs BUILD_ONLY. A DEPLOY build performs:
 2. Dependency installation, syntax checks and delivery-policy tests.
 3. Integration tests against an isolated real PostgreSQL 17 container.
 4. Production dependency installation and Gitleaks, Trivy and npm audit scans.
-5. App/web CodeDeploy ZIP bundles and a SHA-256 manifest.
+5. App/web EC2 ZIP bundles and a SHA-256 manifest.
 6. Approval only for CRITICAL findings; LOW/MEDIUM/HIGH findings continue.
 7. Hash verification, encrypted/versioned S3 upload and active-region schema migration.
-8. App deployment, then web deployment, then HTTPS checkout/worker smoke tests.
+8. Drain/update/re-register one app instance at a time, then each web instance.
+9. Run regional checkout/worker tests through SSM; optionally verify the active CloudFront HTTPS URL.
+10. Restore prior Auto Scaling settings and retain deployment/recovery reports.
 
 Jenkins runtime, Docker integration tests, RDS connectivity and actual AWS deployments still need to run in your environment. No AWS resources were created during code generation. See `VALIDATION.json` for checks actually completed here.
 
@@ -95,8 +97,8 @@ Follow [docs/RECOVERY.md](docs/RECOVERY.md). RDS Multi-AZ standby is not a secon
 | db/001-initial.sql | Schema and six sample products |
 | public/ | Storefront HTML, CSS and browser code |
 | Jenkinsfile | Application CI/CD and critical-only approval |
-| deploy/app/, deploy/web/ | EC2 CodeDeploy AppSpec files and hooks |
+| deploy/runtime/, scripts/install-release.sh | Host configuration and atomic release installation |
 | scripts/deploy.py | Immutable S3 revisions, migrations, rollout and smoke checks |
 | scripts/security.py | Validated scanner results and sanitized security reports |
 
-The infrastructure Terraform pipeline remains a separate workflow. This application project adds no Terraform backend and does not change your local-state preference.
+The infrastructure Terraform pipeline remains a separate workflow on `main`. Jenkins controls application deployment through AWS CLI commands and SSM command transport; S3 stores versioned release files, and Parameter Store holds release pointers and a deployment lease. Auto Scaling bootstrap installs the current pointer on new instances. No CodeDeploy application, agent, deployment group or AppSpec is used. This application project adds no Terraform backend and does not change your local-state preference.

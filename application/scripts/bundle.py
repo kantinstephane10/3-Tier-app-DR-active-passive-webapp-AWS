@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Build two EC2 CodeDeploy revisions. Dependencies are built once in CI."""
+"""Build two EC2 release archives for the Jenkins rollout."""
 from pathlib import Path
 import hashlib
 import json
@@ -20,12 +20,9 @@ for tier in ['app', 'web']:
     if stage.exists():
         shutil.rmtree(stage)
     stage.mkdir()
-    shutil.copy(ROOT / f'deploy/{tier}/appspec.yml', stage / 'appspec.yml')
-    shutil.copytree(ROOT / f'deploy/{tier}/hooks', stage / 'hooks')
-    for hook in (stage / 'hooks').glob('*.sh'):
-        hook.chmod(0o755)
     if tier == 'web':
         shutil.copytree(ROOT / 'public', stage / 'public')
+        (stage / 'public/release.json').write_text(json.dumps({'release': release}) + '\n')
     else:
         app = stage / 'application'
         app.mkdir()

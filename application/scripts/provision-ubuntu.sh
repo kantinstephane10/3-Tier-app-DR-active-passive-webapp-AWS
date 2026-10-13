@@ -7,7 +7,7 @@ REGION=${2:?AWS region required}
 [[ "$REGION" == us-east-1 || "$REGION" == us-west-2 ]] || exit 1
 [[ $(uname -m) == x86_64 ]] || exit 1
 apt-get update
-apt-get install -y ca-certificates curl unzip ruby
+apt-get install -y ca-certificates curl unzip python3 awscli util-linux
 install -d -m 0755 /etc/kantin-orders
 if [[ "$ROLE" == app || "$ROLE" == runner ]]; then
   id kantin-orders >/dev/null 2>&1 || useradd --system --no-create-home --shell /usr/sbin/nologin kantin-orders
@@ -24,14 +24,16 @@ if [[ "$ROLE" == app || "$ROLE" == runner ]]; then
   chmod 0644 /etc/kantin-orders/rds-global-bundle.pem
 fi
 if [[ "$ROLE" == web ]]; then apt-get install -y nginx; fi
-if [[ "$ROLE" == runner ]]; then
-  # Runner needs SSM agent and AWS CLI v2, provisioned in its AMI/user-data separately.
-  command -v aws >/dev/null
-else
-  code_tmp=$(mktemp -d)
-  curl --fail --location --retry 3 "https://aws-codedeploy-$REGION.s3.$REGION.amazonaws.com/latest/install" -o "$code_tmp/install"
-  chmod +x "$code_tmp/install"
-  "$code_tmp/install" auto
-  rm -rf "$code_tmp"
-  systemctl enable --now codedeploy-agent
+# Use SSM for command transport; there is no CodeDeploy agent.
+command -v aws >/dev/null
+# The reviewed runtime scripts must be installed alongside the launch-template setup.
+SCRIPT_ROOT=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+if [[ "$ROLE" != runner ]]; then
+  install -m 0755 "$SCRIPT_ROOT/install-release.sh" /usr/local/bin/kantin-release
+  install -m 0755 "$SCRIPT_ROOT/bootstrap-release.sh" /usr/local/bin/kantin-bootstrap
+  if [[ "$ROLE" == web ]]; then
+    install -m 0755 "$SCRIPT_ROOT/../deploy/runtime/configure-web.sh" /usr/local/bin/kantin-configure-web
+    install -m 0755 "$SCRIPT_ROOT/smoke.py" /usr/local/bin/kantin-smoke
+  fi
 fi
+# SSM agent must be installed/enabled in your base AMI. Verify before first deployment.
