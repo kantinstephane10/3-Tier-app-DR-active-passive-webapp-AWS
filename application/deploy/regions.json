@@ -1,0 +1,22 @@
+{
+  "us-east-1": {
+    "mode": "active",
+    "artifactBucket": "REPLACE-WITH-PRIMARY-VERSIONED-BUCKET",
+    "kmsKeyArn": "REPLACE-WITH-REGIONAL-KMS-KEY-ARN",
+    "application": "kt-orders",
+    "appDeploymentGroup": "kt-orders-primary-app",
+    "webDeploymentGroup": "kt-orders-primary-web",
+    "migrationRunnerId": "REPLACE-WITH-PRIMARY-SSM-INSTANCE-ID",
+    "smokeUrl": "https://REPLACE-WITH-PRIMARY-REGIONAL-TEST-HOSTNAME"
+  },
+  "us-west-2": {
+    "mode": "standby",
+    "artifactBucket": "REPLACE-WITH-SECONDARY-VERSIONED-BUCKET",
+    "kmsKeyArn": "REPLACE-WITH-REGIONAL-KMS-KEY-ARN",
+    "application": "kt-orders",
+    "appDeploymentGroup": "kt-orders-secondary-app",
+    "webDeploymentGroup": "kt-orders-secondary-web",
+    "migrationRunnerId": null,
+    "smokeUrl": "https://REPLACE-WITH-SECONDARY-REGIONAL-TEST-HOSTNAME"
+  }
+}

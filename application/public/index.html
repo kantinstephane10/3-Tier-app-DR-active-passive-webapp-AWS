@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Kantin Tongue's cloud architecture portfolio storefront.">
+  <title>Kantin Supply — CloudOps essentials</title><link rel="stylesheet" href="/styles.css">
+  <script src="/app.js" defer></script>
+</head>
+<body>
+  <header class="nav"><a class="brand" href="/" aria-label="Kantin Supply home"><span class="brand-mark">K.</span> KANTIN<span class="brand-light">SUPPLY</span></a>
+    <nav aria-label="Main navigation"><button id="shop-tab" class="nav-link active">Shop</button><button id="orders-tab" class="nav-link">My orders</button></nav>
+    <button id="cart-toggle" class="bag" aria-expanded="false" aria-controls="cart-panel">Bag <span id="cart-count">0</span></button>
+  </header>
+  <main>
+    <section id="shop-view">
+      <div class="hero"><div class="hero-copy"><span class="eyebrow">THE CLOUDOPS COLLECTION / 001</span><h1>Good tools.<br>Great builds.</h1><p>Everyday essentials for the people who keep the cloud running. Designed for your desk, your day, and your next big idea.</p><button id="browse-button" class="primary">Explore the collection <span>↗</span></button><div class="hero-foot">Created by Kantin Tongue <span>•</span> A working AWS architecture demo</div></div>
+        <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="art-label">BUILD SOMETHING<br>THAT LASTS.</div><div class="notebook"><span>K.</span><small>CLOUD NOTES<br>VOL. 01</small></div><div class="mug"><span>K.</span></div><div class="art-caption">ESSENTIALS, REIMAGINED.</div></div>
+      </div>
+      <div id="collection" class="collection-heading"><div><span class="eyebrow">MADE FOR YOUR EVERYDAY</span><h2>The essentials</h2></div><label class="search-label"><span class="sr-only">Search products</span><input id="search" type="search" placeholder="Find your next essential…" maxlength="80"></label></div>
+      <div class="collection-controls"><div class="filters" aria-label="Product categories"><button data-category="All" class="selected">All essentials</button><button data-category="Workspace">Workspace</button><button data-category="Everyday">Everyday</button><button data-category="Apparel">Apparel</button></div><span id="product-count" class="muted">Loading collection…</span></div>
+      <div id="products" class="product-grid" aria-live="polite"></div>
+    </section>
+    <section id="orders-view" hidden><span class="eyebrow">YOUR COLLECTION, ON ITS WAY</span><h1 class="page-title">My orders</h1><p class="muted">Orders belong to this browser’s guest session. Fulfillment and payments are simulated.</p><button id="refresh-orders" class="secondary">Refresh orders</button><div id="orders-list" class="orders-list"></div></section>
+    <section class="architecture-note"><div class="note-icon">↗</div><div><strong>Built to demonstrate resilience.</strong><p>A real database, retry-safe orders and background processing. This portfolio store does not collect payments or ship products.</p></div><div class="runtime"><span id="status-dot" class="status-dot"></span><span id="runtime-status">Connecting…</span></div></section>
+  </main>
+  <footer><div class="brand footer-brand">KANTIN SUPPLY</div><span>Designed & built by Kantin Tongue</span><span>Cloud architecture portfolio</span></footer>
+  <div id="cart-overlay" class="overlay" hidden></div>
+  <aside id="cart-panel" class="cart-panel" aria-label="Shopping bag" hidden>
+    <div class="cart-heading"><h2>Your bag <span id="cart-heading-count">0</span></h2><button id="cart-close" class="icon-button" aria-label="Close bag">×</button></div>
+    <div id="cart-items" class="cart-items"></div><div class="cart-bottom"><div class="total"><span>Subtotal</span><strong id="cart-total">$0.00</strong></div><p>Demo checkout. No payment or personal details required.</p><button id="checkout" class="primary full" disabled>Place demo order ↗</button></div>
+  </aside>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+</body></html>

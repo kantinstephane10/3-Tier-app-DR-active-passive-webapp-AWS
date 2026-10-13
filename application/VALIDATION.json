@@ -1,0 +1,26 @@
+{
+  "owner": "Kantin Tongue",
+  "runtime": "Node.js 24.19.0",
+  "database_target": "RDS PostgreSQL 17",
+  "completed": [
+    "13 application tests against the embedded PostgreSQL engine, including concurrent retry behavior, signed-session isolation, CSRF, transaction rollback, parallel worker calls, read-only behavior and a restricted DB role",
+    "5 delivery tests for severity mapping, configuration validation, standby migration exclusion, app-before-web ordering and changed-manifest rejection",
+    "HTTP preview and DOM interaction check: catalog, filter, bag, checkout, order history and fulfillment state",
+    "JavaScript syntax checks",
+    "Python compilation and shell syntax checks",
+    "Jenkinsfile Groovy compilation (syntax only)",
+    "Gitleaks 8.30.1, Trivy 0.75.0 and production npm audit completed on a local source checkout; no findings at scan time",
+    "Production app/web CodeDeploy ZIP creation and checks for AppSpec location, hooks, permissions, runtime dependencies and SHA-256 manifest"
+  ],
+  "not_completed": [
+    "Chromium visual layout inspection (browser download unavailable)",
+    "Docker-backed PostgreSQL 17 integration run (Docker unavailable locally; mandatory Jenkins test stage)",
+    "Jenkins declarative/runtime execution and approval permissions",
+    "Nginx/systemd/CodeDeploy hooks on Ubuntu EC2",
+    "AWS Secrets Manager, RDS TLS/replication and IAM integration",
+    "AWS deployment, failover and backup restore"
+  ],
+  "aws_resources_created": false,
+  "scope": "Application and CI/CD code for existing EC2 web/app ASGs; infrastructure provisioning is separate",
+  "security_policy": "Only critical findings request deployment approval; scanner/test/deployment execution errors block without waiver"
+}

@@ -1,0 +1,23 @@
+[Unit]
+Description=Kantin Orders API
+After=network-online.target
+Wants=network-online.target
+[Service]
+User=kantin-orders
+Group=kantin-orders
+WorkingDirectory=/opt/kantin-orders/application
+EnvironmentFile=/etc/kantin-orders/app.env
+ExecStart=/usr/local/bin/node src/server.js
+Restart=always
+RestartSec=5
+TimeoutStopSec=15
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+RestrictSUIDSGID=true
+UMask=0077
+StandardOutput=journal
+StandardError=journal
+[Install]
+WantedBy=multi-user.target

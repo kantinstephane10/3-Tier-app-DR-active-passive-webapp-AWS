@@ -1,0 +1,107 @@
+pipeline {
+  agent { label 'aws-orders-ci' }
+  options {
+    disableConcurrentBuilds()
+    timestamps()
+    timeout(time: 120, unit: 'MINUTES')
+    buildDiscarder(logRotator(numToKeepStr: '20'))
+  }
+  parameters {
+    choice(name: 'ACTION', choices: ['BUILD_ONLY', 'DEPLOY'], description: 'First run builds and scans; DEPLOY releases to existing EC2 tiers.')
+    choice(name: 'TARGET_REGION', choices: ['us-east-1', 'us-west-2'], description: 'Deploy primary first; standby needs replicated schema.')
+  }
+  environment {
+    SECURITY_APPROVERS = 'security-approvers' // Replace with trusted Jenkins group/user IDs.
+    AWS_PAGER = ''
+    AWS_DEFAULT_REGION = "${params.TARGET_REGION}"
+    NPM_CONFIG_FUND = 'false'
+  }
+  stages {
+    stage('Checkout') {
+      steps {
+        deleteDir()
+        checkout scm
+        script { env.RELEASE_ID = "${env.GIT_COMMIT}-${env.BUILD_NUMBER}" }
+      }
+    }
+    stage('Toolchain') {
+      steps {
+        sh '''#!/usr/bin/env bash
+set -euo pipefail
+cd application
+test "$(node -p 'process.versions.node.split(".")[0]')" = 24
+gitleaks version | grep -Fx '8.30.1'
+trivy --version | grep -Fx 'Version: 0.75.0'
+docker version >/dev/null
+python3 --version
+aws --version
+'''
+      }
+    }
+    stage('Install, syntax and PostgreSQL integration tests') {
+      steps {
+        sh '''#!/usr/bin/env bash
+set -euo pipefail
+cd application
+npm ci --ignore-scripts
+npm run check
+python3 -m unittest discover -s test -p 'test_*.py' -v
+bash scripts/postgres-ci.sh
+'''
+      }
+      post { always { junit testResults: 'application/reports/tests.xml', allowEmptyResults: true } }
+    }
+    stage('Security scans and release bundles') {
+      steps {
+        sh '''#!/usr/bin/env bash
+set -euo pipefail
+cd application
+npm ci --omit=dev --ignore-scripts
+python3 scripts/security.py
+npm run bundle
+'''
+        script {
+          env.APPROVED_MANIFEST_SHA = sh(script: 'sha256sum application/dist/manifest.json | cut -d " " -f1', returnStdout: true).trim()
+        }
+      }
+    }
+    stage('Critical-only security approval') {
+      when { expression { params.ACTION == 'DEPLOY' } }
+      steps {
+        script {
+          archiveArtifacts artifacts: 'application/reports/security/*.json', fingerprint: true
+          def critical = sh(script: 'python3 -c "import json; print(json.load(open(\'application/reports/security/summary.json\'))[\'criticalCount\'])"', returnStdout: true).trim().toInteger()
+          if (critical > 0) {
+            def approval
+            timeout(time: 30, unit: 'MINUTES') {
+              approval = input(id: 'criticalRiskAcceptance',
+                message: "${critical} CRITICAL findings. Review this build's reports before deploying ${env.RELEASE_ID} to ${params.TARGET_REGION}.",
+                ok: 'Accept risk and deploy', submitter: env.SECURITY_APPROVERS,
+                submitterParameter: 'APPROVER',
+                parameters: [text(name: 'JUSTIFICATION', defaultValue: '', description: 'Required reason. Do not include secrets.')])
+            }
+            if (!approval.JUSTIFICATION?.trim()) { error('Risk acceptance requires a reason.') }
+            writeFile file: 'application/reports/security/approval.json', text: groovy.json.JsonOutput.toJson([
+              approver: approval.APPROVER, justification: approval.JUSTIFICATION,
+              build: env.BUILD_URL, release: env.RELEASE_ID, region: params.TARGET_REGION,
+              criticalCount: critical, manifestSha256: env.APPROVED_MANIFEST_SHA,
+              time: new Date().format("yyyy-MM-dd'T'HH:mm:ssXXX", TimeZone.getTimeZone('UTC'))])
+          } else { echo 'No CRITICAL findings: release continues automatically.' }
+        }
+      }
+    }
+    stage('Migrate, deploy app, deploy web and smoke test') {
+      when { expression { params.ACTION == 'DEPLOY' } }
+      steps {
+        // AWS CLI uses the trusted agent's instance profile/assumed role. No keys in Git.
+        sh 'cd application && python3 scripts/deploy.py "$TARGET_REGION"'
+      }
+    }
+  }
+  post {
+    always {
+      archiveArtifacts artifacts: 'application/reports/security/*.json,application/reports/deployment.json,application/dist/manifest.json', allowEmptyArchive: true, fingerprint: true
+    }
+    success { archiveArtifacts artifacts: 'application/dist/app.zip,application/dist/web.zip', fingerprint: true }
+  }
+}
