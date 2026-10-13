@@ -1,0 +1,20 @@
+{
+  "name": "kantin-orders",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "worker": "node src/worker.js",
+    "test": "node --test test/*.test.js",
+    "check": "node scripts/check-syntax.js",
+    "bundle": "python3 scripts/bundle.py"
+  },
+  "dependencies": {
+    "@aws-sdk/client-secrets-manager": "3.1150.0",
+    "pg": "8.23.1"
+  }
+}

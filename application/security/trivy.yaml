@@ -1,3 +1,0 @@
-severity: [UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL]
-scan:
-  skip-dirs: [".git", "reports", "dist"]

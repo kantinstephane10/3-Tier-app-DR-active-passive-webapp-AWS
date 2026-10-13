@@ -3,4 +3,4 @@ title = "Kantin Tongue pipeline secret scan"
 useDefault = true
 [[allowlists]]
 description = "Generated local caches and private scan output only"
-paths = ['''(^|/)\.terraform/''', '''(^|/)\.security-private-[^/]+/''', '''(^|/)reports/security/''', '''(^|/)__pycache__/''']
+paths = ['''(^|/)\.security-private-[^/]+/''', '''(^|/)reports/security/''', '''(^|/)__pycache__/''']

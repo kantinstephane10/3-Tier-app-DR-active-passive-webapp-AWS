@@ -1,0 +1,14 @@
+{
+  "us-east-1": {
+    "artifactBucket": "REPLACE-WITH-EXISTING-RELEASE-BUCKET",
+    "kmsKeyArn": "REPLACE-WITH-EXISTING-KMS-KEY-ARN",
+    "appInstanceIds": ["REPLACE-WITH-APP-EC2-INSTANCE-ID"],
+    "webInstanceIds": ["REPLACE-WITH-WEB-EC2-INSTANCE-ID"]
+  },
+  "us-west-2": {
+    "artifactBucket": "REPLACE-WITH-EXISTING-RELEASE-BUCKET",
+    "kmsKeyArn": "REPLACE-WITH-EXISTING-KMS-KEY-ARN",
+    "appInstanceIds": ["REPLACE-WITH-APP-EC2-INSTANCE-ID"],
+    "webInstanceIds": ["REPLACE-WITH-WEB-EC2-INSTANCE-ID"]
+  }
+}

@@ -1,6 +1,0 @@
-title = "Kantin Orders secret scanning"
-[extend]
-useDefault = true
-[[allowlists]]
-description = "Generated dependencies, scan output and bundles"
-paths = ['''(^|/)node_modules/''', '''(^|/)dist/''', '''(^|/)reports/''', '''(^|/)\.security-private-[^/]+/''']

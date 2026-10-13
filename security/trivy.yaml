@@ -1,6 +1,4 @@
-# All severities are reported. Jenkins decides whether approval is necessary.
+# Report every severity; Jenkins applies the CRITICAL-only approval rule.
 severity: [UNKNOWN, LOW, MEDIUM, HIGH, CRITICAL]
-misconfiguration:
-  scanners: [terraform, terraformplan-json, terraformplan-snapshot]
 scan:
-  skip-dirs: [".terraform", ".git", "reports", "__pycache__", "environments/lab/tests"]
+  skip-dirs: [".git", "reports", "__pycache__"]

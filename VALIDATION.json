@@ -1,26 +1,38 @@
 {
-  "owner": "Kantin Tongue",
-  "terraform_required": ">= 1.12.2 (Jenkins agent installs 1.12.2; checked locally with 1.14.8)",
-  "aws_provider": "6.68.0",
-  "random_provider": "3.9.1",
-  "completed": [
-    "terraform fmt -check -recursive",
-    "terraform init and validate: environments/lab and bootstrap",
-    "terraform test: 7 runs with mocked AWS providers, building foundation, primary, dr, edge and edge with a custom domain in sequence, plus rejection of an invalid stage and an invalid account ID",
-    "cloud-init rendering through templatefile and yamldecode; rendered app.py parsed as Python",
-    "Python: 12 unit tests (security policy, report rendering and secret redaction, plan deletion guard)",
-    "shell syntax checks (bash -n) for all scripts",
-    "Trivy 0.75.0 (checksum verified) source scan: 6 CRITICAL AWS-0104, 1 MEDIUM AWS-0178, 1 LOW AWS-0143",
-    "Gitleaks 8.30.1 (checksum verified) git history and directory scans: no leaks found",
-    "security report rendered from the real Trivy results (console table and index.html)"
+  "scope": "Application source and Jenkins deployment to explicitly supplied existing EC2 instances; manual readiness documentation only",
+  "branch": "feat/jenkins-only-app-deployment",
+  "validatedAt": "2026-10-13",
+  "tests": {
+    "nodeApplication": {
+      "passed": 9,
+      "database": "mocked; no running database"
+    },
+    "pythonDeliveryAndSecurity": {
+      "passed": 8,
+      "aws": "mocked; no live AWS operations"
+    }
+  },
+  "checks": {
+    "javascriptSyntax": "passed",
+    "bashSyntaxAndDocumentationExamples": "passed",
+    "jenkinsfileGroovySyntax": "passed; Jenkins runtime not executed",
+    "releaseArchives": "passed; no Terraform, database scripts, environment secrets or service provisioning payloads",
+    "securityScans": {
+      "scanComplete": true,
+      "criticalCount": 0,
+      "counts": {}
+    },
+    "gitWhitespace": "passed"
+  },
+  "notExecuted": [
+    "Live Jenkins pipeline",
+    "Live AWS deployment",
+    "Database schema execution or PostgreSQL integration",
+    "Manual server preparation"
   ],
-  "not_completed": [
-    "terraform plan or apply against a real AWS account",
-    "Trivy scan of a resolved AWS plan (requires a real plan)",
-    "Jenkins runtime, approval gate and HTML report publishing",
-    "smoke test, regional failover, RDS promotion and backup restore"
-  ],
-  "aws_resources_created": false,
-  "authentication": "Jenkins-bound AWS_ACCESS_KEY_ID / AWS_SECRET_ACCESS_KEY for IAM user kt-lab-jenkins",
-  "terraform_state": "Persistent local filesystem on the Jenkins agent, outside the workspace"
+  "limitations": [
+    "Service restarts may interrupt requests",
+    "Failed host rollback is local and best effort; successful earlier hosts stay deployed",
+    "Process health is separate from manual database/business readiness verification"
+  ]
 }
